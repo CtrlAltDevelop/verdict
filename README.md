@@ -113,30 +113,35 @@ keeps it dependency-free and usable anywhere. Instead you implement
 imports stay in one small file.
 
 ```dart
-class DioFailureMapper implements ChainedFailureMapper {
-  const DioFailureMapper();
+class HttpFailureMapper implements ChainedFailureMapper {
+  const HttpFailureMapper();
 
   @override
   Failure? tryMap(Object error, [StackTrace? stackTrace]) {
-    if (error is! DioException) return null; // decline; try the next mapper
+    // Decline anything this mapper does not own; the next one gets a turn.
+    if (error is! HttpException) return null;
+
     final origin = failureOrigin(stackTrace: stackTrace);
-    return switch (error.type) {
-      DioExceptionType.connectionTimeout ||
-      DioExceptionType.connectionError => NetworkFailure(
+    return switch (error) {
+      HttpException(isTimeout: true) => NetworkFailure(
         title: origin,
-        message: error.message ?? 'Network error',
+        message: 'The server did not answer in time.',
       ),
-      _ => ApiFailure(
+      HttpException(status: 401) => AuthFailure(
         title: origin,
-        message: error.message ?? 'Server error',
-        code: error.response?.statusCode,
+        message: 'Session expired.',
+      ),
+      HttpException(:final status, :final body) => ApiFailure(
+        title: origin,
+        message: body,
+        code: status,
       ),
     };
   }
 }
 
 const mapper = CompositeFailureMapper(
-  [DioFailureMapper(), GoogleSignInFailureMapper()],
+  [HttpFailureMapper(), SignInFailureMapper()],
   fallback: DefaultFailureMapper(),
 );
 ```
@@ -176,9 +181,16 @@ trace, so keep it on error paths only.
 
 ## With BLoC
 
-[`verdict_bloc`](https://pub.dev/packages/verdict_bloc) builds on this package
-with a base state that keeps the last-known good data through transient error
-and success states, plus a ready-made paginated list bloc.
+[`verdict_bloc`](https://pub.dev/packages/verdict_bloc) applies the same ideas
+to Flutter: a base state that keeps the last-known good data through transient
+error and success states, plus a ready-made paginated list bloc.
+
+It is a **standalone** package, not a companion — it carries its own copy of
+these types rather than depending on this one, so a Flutter app needs only
+that package. The trade-off is that the two `Failure` types are unrelated: a
+`Failure` from one will not satisfy an API expecting the other, and a file
+importing both needs a prefix. Use this package for pure-Dart layers and
+`verdict_bloc` for Flutter ones, rather than mixing them in a single layer.
 
 ## License
 
