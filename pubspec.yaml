@@ -2,7 +2,7 @@ name: verdict
 description: >-
   A sealed Result type and a structured Failure hierarchy for Dart, so calls
   return a typed verdict instead of throwing across layer boundaries.
-version: 0.1.0
+version: 1.0.0
 homepage: https://github.com/CtrlAltDevelop
 repository: https://github.com/CtrlAltDevelop/verdict
 issue_tracker: https://github.com/CtrlAltDevelop/verdict/issues
@@ -14,12 +14,15 @@ topics:
   - functional
   - sealed
 
+# No `flutter:` constraint on purpose: the package is pure Dart, and declaring
+# one would make the Flutter SDK mandatory for server and CLI consumers.
+# Flutter 3.47.0 ships Dart 3.13.0, so the SDK bound below covers it.
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.13.0
 
 dependencies:
-  equatable: ^2.0.0
+  equatable: ^2.1.0
 
 dev_dependencies:
-  lints: ^6.0.0
-  test: ^1.25.0
+  lints: ^6.1.0
+  test: ^1.31.2

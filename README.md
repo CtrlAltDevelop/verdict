@@ -32,8 +32,13 @@ analyzer points at every site that must now handle it.
 
 ```yaml
 dependencies:
-  verdict: ^0.1.0
+  verdict: ^1.0.0
 ```
+
+Requires Dart 3.13.0 or newer — Flutter 3.47.0 or newer, if you are on
+Flutter. There is no `flutter` constraint in `pubspec.yaml`, so the package
+still resolves in server and CLI projects with no Flutter SDK installed. For
+Dart 3.6–3.12, pin `verdict: ^0.1.0`.
 
 ## Result
 

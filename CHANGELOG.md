@@ -1,3 +1,12 @@
+## 1.0.0
+
+First stable release. The API is unchanged from 0.1.0 and is now covered by
+semantic versioning: no breaking change to `Result`, `Failure`, the mappers,
+`guard` or `failureOrigin` will land outside a 2.0.0.
+
+- **Breaking:** raised the minimum Dart SDK to `^3.13.0`, the version Flutter
+  3.47.0 ships. Stay on 0.1.0 if you need Dart 3.6–3.12.
+
 ## 0.1.0
 
 Initial release.
