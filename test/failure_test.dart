@@ -86,4 +86,63 @@ void main() {
     expect(describe(const AuthFailure(title: 'a', message: 'b')), 'auth');
     expect(describe(const CancelledFailure()), 'cancelled');
   });
+
+  group('diagnostics', () {
+    test('cause and stackTrace are carried but excluded from equality', () {
+      final trace = StackTrace.current;
+      final withCause = UnknownFailure(
+        title: 'test',
+        message: 'boom',
+        cause: const FormatException('bad json'),
+        stackTrace: trace,
+      );
+      const without = UnknownFailure(title: 'test', message: 'boom');
+
+      expect(withCause.cause, isA<FormatException>());
+      expect(withCause.stackTrace, trace);
+      expect(withCause, without, reason: 'diagnostics must not split equality');
+      expect(withCause.hashCode, without.hashCode);
+    });
+  });
+
+  group('copyWith', () {
+    test('replaces only the fields it is given', () {
+      const original = ApiFailure(
+        title: 'origin',
+        message: 'boom',
+        code: 500,
+        referenceId: 'ref-1',
+      );
+
+      expect(
+        original.copyWith(title: 'newOrigin'),
+        const ApiFailure(
+          title: 'newOrigin',
+          message: 'boom',
+          code: 500,
+          referenceId: 'ref-1',
+        ),
+      );
+      expect(original.copyWith(), original);
+    });
+
+    test('keeps each variant its own type', () {
+      expect(
+        const NetworkFailure(title: 't', message: 'm').copyWith(code: 408),
+        const NetworkFailure(title: 't', message: 'm', code: 408),
+      );
+      expect(
+        const AuthFailure(title: 't', message: 'm').copyWith(message: 'gone'),
+        const AuthFailure(title: 't', message: 'gone'),
+      );
+      expect(
+        const CancelledFailure().copyWith(title: 'picker'),
+        const CancelledFailure(title: 'picker'),
+      );
+      expect(
+        const UnknownFailure(title: 't', message: 'm').copyWith(title: 'u'),
+        const UnknownFailure(title: 'u', message: 'm'),
+      );
+    });
+  });
 }

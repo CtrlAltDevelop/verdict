@@ -155,4 +155,27 @@ void main() {
       expect(result.failureOrNull?.title, contains('throwingOperation'));
     });
   });
+
+  group('guard without an explicit mapper', () {
+    test('falls back to DefaultFailureMapper on the async path', () async {
+      final result = await guard<int>(() async => throw Exception('boom'));
+
+      expect(result.failureOrNull, isA<UnknownFailure>());
+      expect(result.failureOrNull?.message, 'boom');
+      expect(result.failureOrNull?.cause, isA<Exception>());
+      expect(result.failureOrNull?.stackTrace, isNotNull);
+    });
+
+    test('falls back to DefaultFailureMapper on the sync path', () {
+      final result = guardSync<int>(() => throw Exception('boom'));
+
+      expect(result.failureOrNull, isA<UnknownFailure>());
+      expect(result.failureOrNull?.message, 'boom');
+    });
+
+    test('still returns an Ok when nothing throws', () async {
+      expect(await guard<int>(() async => 1), const Ok<int>(1));
+      expect(guardSync<int>(() => 1), const Ok<int>(1));
+    });
+  });
 }
