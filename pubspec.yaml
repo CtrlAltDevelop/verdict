@@ -16,15 +16,23 @@ topics:
 
 # No `flutter:` constraint on purpose: the package is pure Dart, and declaring
 # one would make the Flutter SDK mandatory for server and CLI consumers.
-# Flutter 3.47.0 ships Dart 3.13.0, which the bound below covers; the bound
-# itself is one minor lower so Dart 3.12 toolchains can still resolve the
-# package. Nothing here uses a 3.13 language feature.
+# The bound below is the floor the *code* needs, not the newest SDK around:
+# sealed classes, `final class` and pattern matching all landed in Dart 3.0,
+# and nothing here uses a language feature added after that. Anything newer
+# would shut consumers out for no reason.
+#
+# The dev dependencies do need a newer SDK than that floor (lints 6.x wants
+# 3.11, test 1.31 wants 3.8), which is why CI runs on stable. Dev
+# dependencies never constrain consumers, so this does not narrow the range
+# above.
 environment:
-  sdk: ^3.12.0
+  sdk: '>=3.0.0 <4.0.0'
 
+# Dependency bounds are ranges rather than carets on the lower end, so a
+# consumer already on an older 2.x of equatable is not forced to move.
 dependencies:
-  equatable: ^2.1.0
+  equatable: '>=2.0.0 <3.0.0'
 
 dev_dependencies:
-  lints: ^6.1.0
-  test: ^1.31.2
+  lints: '>=5.0.0 <7.0.0'
+  test: '>=1.26.0 <2.0.0'

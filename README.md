@@ -35,10 +35,12 @@ dependencies:
   verdict: ^1.1.0
 ```
 
-Requires Dart 3.12.0 or newer — Flutter 3.46.0 or newer, if you are on
-Flutter. There is no `flutter` constraint in `pubspec.yaml`, so the package
-still resolves in server and CLI projects with no Flutter SDK installed. For
-Dart 3.6–3.11, pin `verdict: ^0.1.0`.
+Requires Dart 3.0.0 or newer — any Flutter 3.10.0 or newer, if you are on
+Flutter. That is the floor the code actually needs (sealed classes and
+pattern matching), and dependency bounds are ranges rather than carets, so
+upgrading `verdict` does not drag the rest of your resolution forward with
+it. There is no `flutter` constraint in `pubspec.yaml`, so the package still
+resolves in server and CLI projects with no Flutter SDK installed.
 
 ## Result
 
