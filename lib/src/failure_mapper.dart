@@ -64,13 +64,15 @@ class DefaultFailureMapper implements FailureMapper {
   @override
   Failure map(Object error, [StackTrace? stackTrace]) {
     final origin = failureOrigin(stackTrace: stackTrace);
-    if (error is Exception) {
-      return UnknownFailure(
-        title: origin,
-        message: error.toString().replaceFirst('Exception: ', ''),
-      );
-    }
-    return UnknownFailure(title: origin, message: error.toString());
+    final message = error is Exception
+        ? error.toString().replaceFirst('Exception: ', '')
+        : error.toString();
+    return UnknownFailure(
+      title: origin,
+      message: message,
+      cause: error,
+      stackTrace: stackTrace,
+    );
   }
 }
 
@@ -82,10 +84,15 @@ class DefaultFailureMapper implements FailureMapper {
 /// Future<Result<User>> getUser() =>
 ///     guard(() async => (await _api.fetchUser()).toDomain(), mapper);
 /// ```
+///
+/// [mapper] defaults to [DefaultFailureMapper], which turns everything into
+/// an [UnknownFailure]. That is fine for a script or a first draft, but pass
+/// your own mapper anywhere the caller is expected to tell a timeout apart
+/// from an expired session.
 Future<Result<T>> guard<T>(
-  Future<T> Function() body,
-  FailureMapper mapper,
-) async {
+  Future<T> Function() body, [
+  FailureMapper mapper = const DefaultFailureMapper(),
+]) async {
   try {
     return Ok<T>(await body());
   } catch (error, stackTrace) {
@@ -94,7 +101,10 @@ Future<Result<T>> guard<T>(
 }
 
 /// The synchronous counterpart to [guard].
-Result<T> guardSync<T>(T Function() body, FailureMapper mapper) {
+Result<T> guardSync<T>(
+  T Function() body, [
+  FailureMapper mapper = const DefaultFailureMapper(),
+]) {
   try {
     return Ok<T>(body());
   } catch (error, stackTrace) {

@@ -11,11 +11,16 @@ import 'package:equatable/equatable.dart';
 sealed class Failure extends Equatable {
   /// Creates a failure carrying a [title], a user-facing [message] and the
   /// optional [referenceId] / [code] a server supplied alongside them.
+  ///
+  /// [cause] and [stackTrace] are diagnostics: the original error this
+  /// failure was mapped from, and where it was thrown.
   const Failure({
     required this.title,
     required this.message,
     this.referenceId,
     this.code,
+    this.cause,
+    this.stackTrace,
   });
 
   /// Where the failure was produced.
@@ -41,6 +46,23 @@ sealed class Failure extends Equatable {
   /// HTTP status or application error code, when one was supplied.
   final int? code;
 
+  /// The original error this failure was mapped from, when one is known.
+  ///
+  /// Meant for logging and crash reporting — never for display, and never
+  /// for control flow: reaching back into an SDK-specific error type here
+  /// undoes the decoupling a [FailureMapper] bought you.
+  ///
+  /// Deliberately **excluded from equality**, along with [stackTrace], so two
+  /// failures describing the same thing stay equal even when they came from
+  /// different exception instances. Tests can therefore compare failures
+  /// directly without reconstructing the error that produced them.
+  final Object? cause;
+
+  /// Where [cause] was thrown, when it was captured.
+  ///
+  /// Excluded from equality — see [cause].
+  final StackTrace? stackTrace;
+
   @override
   List<Object?> get props => [title, message, referenceId, code];
 
@@ -61,7 +83,27 @@ final class ApiFailure extends Failure {
     required super.message,
     super.code,
     super.referenceId,
+    super.cause,
+    super.stackTrace,
   });
+
+  /// A copy of this failure with the given fields replaced.
+  ApiFailure copyWith({
+    String? title,
+    String? message,
+    int? code,
+    String? referenceId,
+    Object? cause,
+    StackTrace? stackTrace,
+  }) =>
+      ApiFailure(
+        title: title ?? this.title,
+        message: message ?? this.message,
+        code: code ?? this.code,
+        referenceId: referenceId ?? this.referenceId,
+        cause: cause ?? this.cause,
+        stackTrace: stackTrace ?? this.stackTrace,
+      );
 }
 
 /// The server could not be reached, or did not answer in time.
@@ -74,7 +116,25 @@ final class NetworkFailure extends Failure {
     required super.title,
     required super.message,
     super.code,
+    super.cause,
+    super.stackTrace,
   });
+
+  /// A copy of this failure with the given fields replaced.
+  NetworkFailure copyWith({
+    String? title,
+    String? message,
+    int? code,
+    Object? cause,
+    StackTrace? stackTrace,
+  }) =>
+      NetworkFailure(
+        title: title ?? this.title,
+        message: message ?? this.message,
+        code: code ?? this.code,
+        cause: cause ?? this.cause,
+        stackTrace: stackTrace ?? this.stackTrace,
+      );
 }
 
 /// Something failed in a way that does not fit the other variants.
@@ -83,7 +143,26 @@ final class NetworkFailure extends Failure {
 /// from [NetworkFailure] so the UI can offer different copy and recovery.
 final class UnknownFailure extends Failure {
   /// Creates a failure describing an unclassified error.
-  const UnknownFailure({required super.title, required super.message});
+  const UnknownFailure({
+    required super.title,
+    required super.message,
+    super.cause,
+    super.stackTrace,
+  });
+
+  /// A copy of this failure with the given fields replaced.
+  UnknownFailure copyWith({
+    String? title,
+    String? message,
+    Object? cause,
+    StackTrace? stackTrace,
+  }) =>
+      UnknownFailure(
+        title: title ?? this.title,
+        message: message ?? this.message,
+        cause: cause ?? this.cause,
+        stackTrace: stackTrace ?? this.stackTrace,
+      );
 }
 
 /// The caller is not authenticated, or the session is no longer usable.
@@ -92,7 +171,26 @@ final class UnknownFailure extends Failure {
 /// rather than reported as an error.
 final class AuthFailure extends Failure {
   /// Creates a failure describing an absent or unusable session.
-  const AuthFailure({required super.title, required super.message});
+  const AuthFailure({
+    required super.title,
+    required super.message,
+    super.cause,
+    super.stackTrace,
+  });
+
+  /// A copy of this failure with the given fields replaced.
+  AuthFailure copyWith({
+    String? title,
+    String? message,
+    Object? cause,
+    StackTrace? stackTrace,
+  }) =>
+      AuthFailure(
+        title: title ?? this.title,
+        message: message ?? this.message,
+        cause: cause ?? this.cause,
+        stackTrace: stackTrace ?? this.stackTrace,
+      );
 }
 
 /// The user backed out of a flow before it completed.
@@ -105,5 +203,21 @@ final class CancelledFailure extends Failure {
   const CancelledFailure({
     super.title = 'Cancelled',
     super.message = 'Cancelled by user',
+    super.cause,
+    super.stackTrace,
   });
+
+  /// A copy of this failure with the given fields replaced.
+  CancelledFailure copyWith({
+    String? title,
+    String? message,
+    Object? cause,
+    StackTrace? stackTrace,
+  }) =>
+      CancelledFailure(
+        title: title ?? this.title,
+        message: message ?? this.message,
+        cause: cause ?? this.cause,
+        stackTrace: stackTrace ?? this.stackTrace,
+      );
 }
