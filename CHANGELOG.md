@@ -3,6 +3,11 @@
 Additive only — nothing in 1.0.0 changed shape, so the upgrade is a version
 bump.
 
+- Lowered the minimum Dart SDK back to `^3.12.0`. 1.0.0 raised it to
+  `^3.13.0`, but nothing in the package uses a 3.13 language feature, so the
+  bound was stricter than the code needed. Widening it is not breaking: every
+  1.0.0 consumer still resolves.
+
 - `Result` gained `mapFailure`, `recover`, `recoverWith`, `getOrElseWith`,
   `valueOrThrow`, the `onOk` / `onErr` side-effect taps, the `mapAsync` /
   `flatMapAsync` async counterparts, and the `Result.ok` / `Result.err`

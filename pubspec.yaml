@@ -16,9 +16,11 @@ topics:
 
 # No `flutter:` constraint on purpose: the package is pure Dart, and declaring
 # one would make the Flutter SDK mandatory for server and CLI consumers.
-# Flutter 3.47.0 ships Dart 3.13.0, so the SDK bound below covers it.
+# Flutter 3.47.0 ships Dart 3.13.0, which the bound below covers; the bound
+# itself is one minor lower so Dart 3.12 toolchains can still resolve the
+# package. Nothing here uses a 3.13 language feature.
 environment:
-  sdk: ^3.13.0
+  sdk: ^3.12.0
 
 dependencies:
   equatable: ^2.1.0
