@@ -63,6 +63,10 @@ class UserRepository {
         return unit;
       }, mapper);
 
+  /// A second fallible call, to show a chain of them.
+  Future<Result<String>> getGreeting(String id) =>
+      guard(() async => 'welcome, ${(await _fetch(id)).name}', mapper);
+
   Future<User> _fetch(String id) async {
     if (id == 'slow') throw const HttpTimeoutException(30);
     if (id == 'gone') {
@@ -99,6 +103,23 @@ Future<void> main() async {
 
   // Operations with nothing to return use Result<Unit>.
   print('logout ok: ${(await repository.logout()).isOk}');
+
+  // Chaining happens on the future itself, so the pipeline reads forwards
+  // and the first failure short-circuits everything after it.
+  final greeting = await repository
+      .getUser('gone')
+      .flatMapAsync((user) => repository.getGreeting(user.name))
+      .map((line) => line.toUpperCase())
+      .onErr((failure) => print('chain failed: ${_describe(failure)}'))
+      .getOrElse('(no greeting)');
+  print('greeting: $greeting');
+
+  // Several results collapse into one, short-circuiting on the first failure.
+  final ids = ['ada', 'grace'];
+  final users = Result.collect(
+    await Future.wait(ids.map(repository.getUser)),
+  ).map((users) => users.map((user) => user.name).join(', '));
+  print('collected: ${users.getOrElseWith((f) => f.message)}');
 }
 
 /// Presentation picks copy from the failure *type*, never from

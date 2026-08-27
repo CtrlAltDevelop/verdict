@@ -32,7 +32,7 @@ analyzer points at every site that must now handle it.
 
 ```yaml
 dependencies:
-  verdict: ^1.0.0
+  verdict: ^1.1.0
 ```
 
 Requires Dart 3.13.0 or newer — Flutter 3.47.0 or newer, if you are on
@@ -71,6 +71,48 @@ switch (result) {
 }
 ```
 
+On the error side, `mapFailure` re-labels a failure, `recover` turns one back
+into a value, and `recoverWith` retries into another `Result`:
+
+```dart
+final err = Err<int>(failure);
+
+err.mapFailure((f) => f.copyWith(title: 'loadCount'));  // Err(…)
+err.recover((f) => 0);                                  // Ok(0)
+err.recoverWith((f) => cache.read());                   // Ok(…) or Err(…)
+err.getOrElseWith((f) => f.code ?? -1);                 // fallback from f
+```
+
+`onOk` / `onErr` run a side effect and hand the result straight back, and
+`valueOrThrow` throws a `FailureException` for the rare edge — a test, a
+`main` — where a failure genuinely cannot be handled.
+
+Several results collapse into one with `Result.collect`, which short-circuits
+on the first failure, and a nested `Result<Result<T>>` collapses with
+`flatten()`:
+
+```dart
+Result.collect([Ok(1), Ok(2)]);        // Ok([1, 2])
+Result.collect([Ok(1), Err(failure)]); // Err(failure)
+```
+
+### Async chaining
+
+Every combinator has an async counterpart (`mapAsync`, `flatMapAsync`), and
+the same names exist on `Future<Result<T>>` — so a pipeline reads forwards
+instead of nesting `await`s:
+
+```dart
+final name = await repository
+    .getUser(id)                                          // Future<Result<User>>
+    .flatMapAsync((user) => repository.getProfile(user.id))
+    .map((profile) => profile.displayName)
+    .onErr(logger.warn)
+    .getOrElse('anonymous');
+```
+
+The first failure short-circuits the rest of the chain, untouched.
+
 For operations whose success carries no payload, use `Result<Unit>` and return
 `const Ok(unit)`:
 
@@ -93,7 +135,11 @@ Five variants, chosen so the UI can pick a different response for each:
 | `CancelledFailure`| User backed out of a flow                  | Return to idle, silently  |
 | `UnknownFailure`  | Anything else (parse errors, bugs)         | Generic error copy        |
 
-Each carries `title`, `message`, and optional `referenceId` and `code`.
+Each carries `title`, `message`, and optional `referenceId` and `code`, plus
+optional `cause` and `stackTrace` diagnostics holding the original error.
+Those two are **excluded from equality**, so a failure compares the same
+whether or not the error that produced it was kept — tests can match on
+failures without reconstructing exceptions. Every variant has a `copyWith`.
 
 > **`title` is a diagnostic origin, not display copy.** It holds the call site
 > that produced the failure (see `failureOrigin`) so logs and bug reports can
@@ -164,7 +210,9 @@ Future<Result<User>> getUser(String id) =>
     guard(() async => (await _api.fetchUser(id)).toDomain(), mapper);
 ```
 
-`guardSync` is the synchronous counterpart.
+`guardSync` is the synchronous counterpart. The mapper is optional and
+defaults to `DefaultFailureMapper` — fine for a script, but pass your own
+anywhere the caller must tell a timeout apart from an expired session.
 
 ### failureOrigin
 

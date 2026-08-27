@@ -1,3 +1,28 @@
+## 1.1.0
+
+Additive only — nothing in 1.0.0 changed shape, so the upgrade is a version
+bump.
+
+- `Result` gained `mapFailure`, `recover`, `recoverWith`, `getOrElseWith`,
+  `valueOrThrow`, the `onOk` / `onErr` side-effect taps, the `mapAsync` /
+  `flatMapAsync` async counterparts, and the `Result.ok` / `Result.err`
+  constructors.
+- `Result.collect` turns an `Iterable<Result<T>>` into a `Result<List<T>>`,
+  short-circuiting on the first failure.
+- `flatten()` collapses a nested `Result<Result<T>>`.
+- A `FutureResult` extension mirrors the whole surface on
+  `Future<Result<T>>`, so an async pipeline chains forwards instead of
+  nesting `await`s.
+- `FailureException` carries a `Failure` across a throwing boundary; it is
+  what `valueOrThrow` throws.
+- `Failure` gained optional `cause` and `stackTrace` diagnostics, and every
+  variant gained `copyWith`. Both new fields are **excluded from equality**,
+  so failures compare the same whether or not the original error was kept.
+- `DefaultFailureMapper` now records the error and its trace as `cause` and
+  `stackTrace`.
+- The `mapper` argument of `guard` / `guardSync` is now optional and defaults
+  to `DefaultFailureMapper`.
+
 ## 1.0.0
 
 First stable release. The API is unchanged from 0.1.0 and is now covered by
