@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          # The minimum the package claims to support, so the constraint in
+          # pubspec.yaml is verified rather than assumed.
+          sdk: "3.13.0"
+      - run: dart pub get
+      - run: dart analyze --fatal-infos
+      - run: dart test
+      - run: dart run example/verdict_example.dart
+      - run: dart pub publish --dry-run
