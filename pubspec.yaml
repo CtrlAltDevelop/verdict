@@ -23,9 +23,9 @@ environment:
   sdk: ^3.12.0
 
 # Dependency bounds are ranges rather than carets on the lower end, so a
-# consumer already on an older 2.x of equatable is not forced to move.
+# consumer already on an older 3.x of equatable is not forced to move.
 dependencies:
-  equatable: ">=2.0.0 <3.0.0"
+  equatable: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
   lints: ">=6.0.0 <7.0.0"
