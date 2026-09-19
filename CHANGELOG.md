@@ -1,4 +1,4 @@
-## 1.2.0
+## 2.0.0
 
 - No change to the published code. CI moved to the shared reusable workflow in
   CtrlAltDevelop/ci-workflows: formatting, `analyze --fatal-infos`, the tests,
