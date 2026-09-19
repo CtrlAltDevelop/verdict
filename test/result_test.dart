@@ -133,9 +133,9 @@ void main() {
   group('switch exhaustiveness', () {
     test('a sealed switch covers both branches without a default', () {
       String describe(Result<int> result) => switch (result) {
-            Ok(:final value) => 'ok $value',
-            Err(:final failure) => 'err ${failure.code}',
-          };
+        Ok(:final value) => 'ok $value',
+        Err(:final failure) => 'err ${failure.code}',
+      };
 
       expect(describe(const Ok<int>(1)), 'ok 1');
       expect(describe(const Err<int>(_failure)), 'err 400');

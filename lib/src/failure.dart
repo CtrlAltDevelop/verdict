@@ -67,7 +67,8 @@ sealed class Failure extends Equatable {
   List<Object?> get props => [title, message, referenceId, code];
 
   @override
-  String toString() => '$runtimeType(title: $title, message: $message, '
+  String toString() =>
+      '$runtimeType(title: $title, message: $message, '
       'code: $code, referenceId: $referenceId)';
 }
 
@@ -95,15 +96,14 @@ final class ApiFailure extends Failure {
     String? referenceId,
     Object? cause,
     StackTrace? stackTrace,
-  }) =>
-      ApiFailure(
-        title: title ?? this.title,
-        message: message ?? this.message,
-        code: code ?? this.code,
-        referenceId: referenceId ?? this.referenceId,
-        cause: cause ?? this.cause,
-        stackTrace: stackTrace ?? this.stackTrace,
-      );
+  }) => ApiFailure(
+    title: title ?? this.title,
+    message: message ?? this.message,
+    code: code ?? this.code,
+    referenceId: referenceId ?? this.referenceId,
+    cause: cause ?? this.cause,
+    stackTrace: stackTrace ?? this.stackTrace,
+  );
 }
 
 /// The server could not be reached, or did not answer in time.
@@ -127,14 +127,13 @@ final class NetworkFailure extends Failure {
     int? code,
     Object? cause,
     StackTrace? stackTrace,
-  }) =>
-      NetworkFailure(
-        title: title ?? this.title,
-        message: message ?? this.message,
-        code: code ?? this.code,
-        cause: cause ?? this.cause,
-        stackTrace: stackTrace ?? this.stackTrace,
-      );
+  }) => NetworkFailure(
+    title: title ?? this.title,
+    message: message ?? this.message,
+    code: code ?? this.code,
+    cause: cause ?? this.cause,
+    stackTrace: stackTrace ?? this.stackTrace,
+  );
 }
 
 /// Something failed in a way that does not fit the other variants.
@@ -156,13 +155,12 @@ final class UnknownFailure extends Failure {
     String? message,
     Object? cause,
     StackTrace? stackTrace,
-  }) =>
-      UnknownFailure(
-        title: title ?? this.title,
-        message: message ?? this.message,
-        cause: cause ?? this.cause,
-        stackTrace: stackTrace ?? this.stackTrace,
-      );
+  }) => UnknownFailure(
+    title: title ?? this.title,
+    message: message ?? this.message,
+    cause: cause ?? this.cause,
+    stackTrace: stackTrace ?? this.stackTrace,
+  );
 }
 
 /// The caller is not authenticated, or the session is no longer usable.
@@ -184,13 +182,12 @@ final class AuthFailure extends Failure {
     String? message,
     Object? cause,
     StackTrace? stackTrace,
-  }) =>
-      AuthFailure(
-        title: title ?? this.title,
-        message: message ?? this.message,
-        cause: cause ?? this.cause,
-        stackTrace: stackTrace ?? this.stackTrace,
-      );
+  }) => AuthFailure(
+    title: title ?? this.title,
+    message: message ?? this.message,
+    cause: cause ?? this.cause,
+    stackTrace: stackTrace ?? this.stackTrace,
+  );
 }
 
 /// The user backed out of a flow before it completed.
@@ -213,11 +210,10 @@ final class CancelledFailure extends Failure {
     String? message,
     Object? cause,
     StackTrace? stackTrace,
-  }) =>
-      CancelledFailure(
-        title: title ?? this.title,
-        message: message ?? this.message,
-        cause: cause ?? this.cause,
-        stackTrace: stackTrace ?? this.stackTrace,
-      );
+  }) => CancelledFailure(
+    title: title ?? this.title,
+    message: message ?? this.message,
+    cause: cause ?? this.cause,
+    stackTrace: stackTrace ?? this.stackTrace,
+  );
 }

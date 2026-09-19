@@ -5,18 +5,8 @@ void main() {
   group('equality', () {
     test('same variant with same fields is equal', () {
       expect(
-        const ApiFailure(
-          title: 'a',
-          message: 'b',
-          code: 1,
-          referenceId: 'r',
-        ),
-        const ApiFailure(
-          title: 'a',
-          message: 'b',
-          code: 1,
-          referenceId: 'r',
-        ),
+        const ApiFailure(title: 'a', message: 'b', code: 1, referenceId: 'r'),
+        const ApiFailure(title: 'a', message: 'b', code: 1, referenceId: 'r'),
       );
     });
 
@@ -73,12 +63,12 @@ void main() {
 
   test('the hierarchy switches exhaustively without a default', () {
     String describe(Failure failure) => switch (failure) {
-          ApiFailure() => 'api',
-          NetworkFailure() => 'network',
-          UnknownFailure() => 'unknown',
-          AuthFailure() => 'auth',
-          CancelledFailure() => 'cancelled',
-        };
+      ApiFailure() => 'api',
+      NetworkFailure() => 'network',
+      UnknownFailure() => 'unknown',
+      AuthFailure() => 'auth',
+      CancelledFailure() => 'cancelled',
+    };
 
     expect(describe(const ApiFailure(title: 'a', message: 'b')), 'api');
     expect(describe(const NetworkFailure(title: 'a', message: 'b')), 'network');

@@ -141,13 +141,14 @@ String failureOrigin({
   const ownPackage = 'package:verdict/';
 
   for (final line in (stackTrace ?? StackTrace.current).toString().split(
-        '\n',
-      )) {
+    '\n',
+  )) {
     if (line.trim().isEmpty) continue;
     if (line.contains(ownPackage)) continue;
     if (skipFiles.any(line.contains)) continue;
 
-    final match = RegExp(r'#\d+\s+([^\s]+)\s+\(').firstMatch(line) ??
+    final match =
+        RegExp(r'#\d+\s+([^\s]+)\s+\(').firstMatch(line) ??
         RegExp(r'#\d+\s+([^\s]+)').firstMatch(line);
     final method = match?.group(1);
     if (method != null) return method;

@@ -9,8 +9,8 @@ class _TimeoutMapper implements ChainedFailureMapper {
   @override
   Failure? tryMap(Object error, [StackTrace? stackTrace]) =>
       error is _TimeoutError
-          ? const NetworkFailure(title: 'timeout', message: 'timed out')
-          : null;
+      ? const NetworkFailure(title: 'timeout', message: 'timed out')
+      : null;
 }
 
 class _NeverMapper implements ChainedFailureMapper {
@@ -55,10 +55,9 @@ void main() {
   });
 
   group('CompositeFailureMapper', () {
-    const composite = CompositeFailureMapper(
-      [_TimeoutMapper()],
-      fallback: DefaultFailureMapper(),
-    );
+    const composite = CompositeFailureMapper([
+      _TimeoutMapper(),
+    ], fallback: DefaultFailureMapper());
 
     test('uses the mapper that claims the error', () {
       final failure = composite.map(_TimeoutError());
@@ -75,10 +74,10 @@ void main() {
     });
 
     test('tries mappers in order and skips those that decline', () {
-      const ordered = CompositeFailureMapper(
-        [_NeverMapper(), _TimeoutMapper()],
-        fallback: DefaultFailureMapper(),
-      );
+      const ordered = CompositeFailureMapper([
+        _NeverMapper(),
+        _TimeoutMapper(),
+      ], fallback: DefaultFailureMapper());
 
       expect(ordered.map(_TimeoutError()), isA<NetworkFailure>());
     });

@@ -27,25 +27,24 @@ class HttpFailureMapper implements ChainedFailureMapper {
     final origin = failureOrigin(stackTrace: stackTrace);
     return switch (error) {
       HttpTimeoutException(:final seconds) => NetworkFailure(
-          title: origin,
-          message: 'The server did not answer within ${seconds}s.',
-        ),
+        title: origin,
+        message: 'The server did not answer within ${seconds}s.',
+      ),
       HttpStatusException(:final status, :final body) when status == 401 =>
         AuthFailure(title: origin, message: body),
       HttpStatusException(:final status, :final body) => ApiFailure(
-          title: origin,
-          message: body,
-          code: status,
-        ),
+        title: origin,
+        message: body,
+        code: status,
+      ),
       _ => null,
     };
   }
 }
 
-const mapper = CompositeFailureMapper(
-  [HttpFailureMapper()],
-  fallback: DefaultFailureMapper(),
-);
+const mapper = CompositeFailureMapper([
+  HttpFailureMapper(),
+], fallback: DefaultFailureMapper());
 
 class User {
   const User(this.name);
@@ -59,9 +58,9 @@ class UserRepository {
       guard(() async => _fetch(id), mapper);
 
   Future<Result<Unit>> logout() => guard(() async {
-        // …clear the session…
-        return unit;
-      }, mapper);
+    // …clear the session…
+    return unit;
+  }, mapper);
 
   /// A second fallible call, to show a chain of them.
   Future<Result<String>> getGreeting(String id) =>
@@ -95,10 +94,9 @@ Future<void> main() async {
   }
 
   // `fold` collapses both branches when you just want one value out.
-  final label = (await repository.getUser('ada')).fold(
-    onOk: (user) => user.name,
-    onErr: (failure) => failure.message,
-  );
+  final label = (await repository.getUser(
+    'ada',
+  )).fold(onOk: (user) => user.name, onErr: (failure) => failure.message);
   print('label: $label');
 
   // Operations with nothing to return use Result<Unit>.
@@ -125,9 +123,9 @@ Future<void> main() async {
 /// Presentation picks copy from the failure *type*, never from
 /// [Failure.title] — that field is a diagnostic origin, not display text.
 String _describe(Failure failure) => switch (failure) {
-      ApiFailure(:final message, :final code) => 'server said $code: $message',
-      NetworkFailure() => 'Check your connection and try again.',
-      AuthFailure() => 'Please sign in again.',
-      CancelledFailure() => 'Cancelled.',
-      UnknownFailure() => 'Something went wrong.',
-    };
+  ApiFailure(:final message, :final code) => 'server said $code: $message',
+  NetworkFailure() => 'Check your connection and try again.',
+  AuthFailure() => 'Please sign in again.',
+  CancelledFailure() => 'Cancelled.',
+  UnknownFailure() => 'Something went wrong.',
+};

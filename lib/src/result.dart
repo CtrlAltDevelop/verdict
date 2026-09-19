@@ -60,15 +60,15 @@ sealed class Result<T> {
   /// here does not on its own prove failure — check [isErr] when the
   /// distinction matters.
   T? get valueOrNull => switch (this) {
-        Ok(:final value) => value,
-        Err() => null,
-      };
+    Ok(:final value) => value,
+    Err() => null,
+  };
 
   /// The failure when this is an [Err], or `null` when it is an [Ok].
   Failure? get failureOrNull => switch (this) {
-        Ok() => null,
-        Err(:final failure) => failure,
-      };
+    Ok() => null,
+    Err(:final failure) => failure,
+  };
 
   /// The value when this is an [Ok], otherwise throws a [FailureException].
   ///
@@ -77,24 +77,24 @@ sealed class Result<T> {
   /// prefer [fold], [getOrElse] or a `switch`: throwing here puts the error
   /// back into the control flow this package exists to keep it out of.
   T get valueOrThrow => switch (this) {
-        Ok(:final value) => value,
-        Err(:final failure) => throw FailureException(failure),
-      };
+    Ok(:final value) => value,
+    Err(:final failure) => throw FailureException(failure),
+  };
 
   /// The value when this is an [Ok], otherwise [fallback].
   T getOrElse(T fallback) => switch (this) {
-        Ok(:final value) => value,
-        Err() => fallback,
-      };
+    Ok(:final value) => value,
+    Err() => fallback,
+  };
 
   /// The value when this is an [Ok], otherwise the result of [fallback].
   ///
   /// The lazy counterpart to [getOrElse]: use it when the fallback is
   /// expensive, or when it depends on what went wrong.
   T getOrElseWith(T Function(Failure failure) fallback) => switch (this) {
-        Ok(:final value) => value,
-        Err(:final failure) => fallback(failure),
-      };
+    Ok(:final value) => value,
+    Err(:final failure) => fallback(failure),
+  };
 
   /// Collapses both branches into a single value of type [R].
   ///
@@ -107,18 +107,17 @@ sealed class Result<T> {
   R fold<R>({
     required R Function(T value) onOk,
     required R Function(Failure failure) onErr,
-  }) =>
-      switch (this) {
-        Ok(:final value) => onOk(value),
-        Err(:final failure) => onErr(failure),
-      };
+  }) => switch (this) {
+    Ok(:final value) => onOk(value),
+    Err(:final failure) => onErr(failure),
+  };
 
   /// Applies [transform] to the value of an [Ok], passing an [Err] through
   /// untouched.
   Result<R> map<R>(R Function(T value) transform) => switch (this) {
-        Ok(:final value) => Ok<R>(transform(value)),
-        Err(:final failure) => Err<R>(failure),
-      };
+    Ok(:final value) => Ok<R>(transform(value)),
+    Err(:final failure) => Err<R>(failure),
+  };
 
   /// The asynchronous counterpart to [map].
   Future<Result<R>> mapAsync<R>(Future<R> Function(T value) transform) async =>
@@ -130,9 +129,9 @@ sealed class Result<T> {
   /// Chains another fallible operation onto an [Ok], passing an [Err]
   /// through untouched.
   Result<R> flatMap<R>(Result<R> Function(T value) transform) => switch (this) {
-        Ok(:final value) => transform(value),
-        Err(:final failure) => Err<R>(failure),
-      };
+    Ok(:final value) => transform(value),
+    Err(:final failure) => Err<R>(failure),
+  };
 
   /// The asynchronous counterpart to [flatMap].
   ///
@@ -142,11 +141,10 @@ sealed class Result<T> {
   /// ```
   Future<Result<R>> flatMapAsync<R>(
     Future<Result<R>> Function(T value) transform,
-  ) async =>
-      switch (this) {
-        Ok(:final value) => await transform(value),
-        Err(:final failure) => Err<R>(failure),
-      };
+  ) async => switch (this) {
+    Ok(:final value) => await transform(value),
+    Err(:final failure) => Err<R>(failure),
+  };
 
   /// Applies [transform] to the failure of an [Err], passing an [Ok] through
   /// untouched.
@@ -166,9 +164,9 @@ sealed class Result<T> {
   /// final settings = (await load()).recover((_) => Settings.defaults());
   /// ```
   Result<T> recover(T Function(Failure failure) transform) => switch (this) {
-        Ok() => this,
-        Err(:final failure) => Ok<T>(transform(failure)),
-      };
+    Ok() => this,
+    Err(:final failure) => Ok<T>(transform(failure)),
+  };
 
   /// Like [recover], but [transform] may itself fail — a retry, or a fall
   /// back to a cache that might be empty.
@@ -252,9 +250,9 @@ class FailureException implements Exception {
 extension NestedResult<T> on Result<Result<T>> {
   /// Collapses `Result<Result<T>>` into `Result<T>`.
   Result<T> flatten() => switch (this) {
-        Ok(:final value) => value,
-        Err(:final failure) => Err<T>(failure),
-      };
+    Ok(:final value) => value,
+    Err(:final failure) => Err<T>(failure),
+  };
 }
 
 /// Chaining for results that have not been awaited yet, so a pipeline reads
@@ -283,8 +281,7 @@ extension FutureResult<T> on Future<Result<T>> {
   /// Awaits this result, then applies [Result.flatMapAsync].
   Future<Result<R>> flatMapAsync<R>(
     Future<Result<R>> Function(T value) transform,
-  ) async =>
-      (await this).flatMapAsync(transform);
+  ) async => (await this).flatMapAsync(transform);
 
   /// Awaits this result, then applies [Result.mapFailure].
   Future<Result<T>> mapFailure(Failure Function(Failure failure) transform) =>
@@ -297,8 +294,7 @@ extension FutureResult<T> on Future<Result<T>> {
   /// Awaits this result, then applies [Result.recoverWith].
   Future<Result<T>> recoverWith(
     Result<T> Function(Failure failure) transform,
-  ) =>
-      then((result) => result.recoverWith(transform));
+  ) => then((result) => result.recoverWith(transform));
 
   /// Awaits this result, then applies [Result.onOk].
   Future<Result<T>> onOk(void Function(T value) action) =>
@@ -312,8 +308,7 @@ extension FutureResult<T> on Future<Result<T>> {
   Future<R> fold<R>({
     required R Function(T value) onOk,
     required R Function(Failure failure) onErr,
-  }) =>
-      then((result) => result.fold(onOk: onOk, onErr: onErr));
+  }) => then((result) => result.fold(onOk: onOk, onErr: onErr));
 
   /// Awaits this result, then applies [Result.getOrElse].
   Future<T> getOrElse(T fallback) =>

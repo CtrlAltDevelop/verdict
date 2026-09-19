@@ -1,5 +1,10 @@
 # verdict
 
+[![pub package](https://img.shields.io/pub/v/verdict.svg)](https://pub.dev/packages/verdict)
+[![pub points](https://img.shields.io/pub/points/verdict)](https://pub.dev/packages/verdict/score)
+[![CI](https://github.com/CtrlAltDevelop/verdict/actions/workflows/ci.yml/badge.svg)](https://github.com/CtrlAltDevelop/verdict/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/CtrlAltDevelop/verdict/blob/main/LICENSE)
+
 A sealed `Result` type and a structured `Failure` hierarchy for Dart, so
 fallible calls return a typed verdict instead of throwing across layer
 boundaries.
@@ -32,15 +37,17 @@ analyzer points at every site that must now handle it.
 
 ```yaml
 dependencies:
-  verdict: ^1.1.0
+  verdict: ">=1.2.0 <2.0.0"
 ```
 
-Requires Dart 3.0.0 or newer — any Flutter 3.10.0 or newer, if you are on
-Flutter. That is the floor the code actually needs (sealed classes and
-pattern matching), and dependency bounds are ranges rather than carets, so
-upgrading `verdict` does not drag the rest of your resolution forward with
-it. There is no `flutter` constraint in `pubspec.yaml`, so the package still
-resolves in server and CLI projects with no Flutter SDK installed.
+Requires Dart 3.12.0 or newer — Flutter 3.44.0 or newer, if you are on
+Flutter. The code needs only Dart 3.0 — sealed classes and
+pattern matching — so the floor is the one every package here is gated on
+rather than a requirement of the source. Dependency bounds are ranges rather
+than carets, so upgrading `verdict` does not drag the rest of your resolution
+forward with it. There is no `flutter` constraint in `pubspec.yaml`, so the
+package still resolves in server and CLI projects with no Flutter SDK
+installed.
 
 ## Result
 

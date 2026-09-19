@@ -59,7 +59,10 @@ void main() {
 
   group('recover', () {
     test('turns an Err into an Ok', () {
-      expect(const Err<int>(_failure).recover((f) => f.code ?? 0), const Ok(400));
+      expect(
+        const Err<int>(_failure).recover((f) => f.code ?? 0),
+        const Ok(400),
+      );
     });
 
     test('leaves an Ok untouched', () {
@@ -102,7 +105,10 @@ void main() {
     test('onErr runs only for an Err and returns the result unchanged', () {
       final seen = <Failure>[];
 
-      expect(const Err<int>(_failure).onErr(seen.add), const Err<int>(_failure));
+      expect(
+        const Err<int>(_failure).onErr(seen.add),
+        const Err<int>(_failure),
+      );
       expect(const Ok<int>(1).onErr(seen.add), const Ok<int>(1));
       expect(seen, [_failure]);
     });
@@ -113,17 +119,19 @@ void main() {
       expect(await const Ok<int>(1).mapAsync((n) async => n + 1), const Ok(2));
     });
 
-    test('mapAsync passes an Err through without calling the transform',
-        () async {
-      var called = false;
-      final result = await const Err<int>(_failure).mapAsync((n) async {
-        called = true;
-        return n;
-      });
+    test(
+      'mapAsync passes an Err through without calling the transform',
+      () async {
+        var called = false;
+        final result = await const Err<int>(_failure).mapAsync((n) async {
+          called = true;
+          return n;
+        });
 
-      expect(result, const Err<int>(_failure));
-      expect(called, isFalse);
-    });
+        expect(result, const Err<int>(_failure));
+        expect(called, isFalse);
+      },
+    );
 
     test('flatMapAsync chains a fallible async step', () async {
       expect(
@@ -131,8 +139,9 @@ void main() {
         const Ok<String>('1'),
       );
       expect(
-        await const Err<int>(_failure)
-            .flatMapAsync((n) async => Ok<String>('$n')),
+        await const Err<int>(
+          _failure,
+        ).flatMapAsync((n) async => Ok<String>('$n')),
         const Err<String>(_failure),
       );
     });
@@ -217,7 +226,10 @@ void main() {
     test('exposes fold, taps, recovery and the nullable accessors', () async {
       expect(await ok().fold(onOk: (n) => '$n', onErr: (f) => f.message), '1');
       expect(await err().recover((_) => 7), const Ok<int>(7));
-      expect(await err().recoverWith((_) => const Ok<int>(8)), const Ok<int>(8));
+      expect(
+        await err().recoverWith((_) => const Ok<int>(8)),
+        const Ok<int>(8),
+      );
       expect(await err().mapFailure((_) => _other), const Err<int>(_other));
       expect(await ok().valueOrNull, 1);
       expect(await err().failureOrNull, _failure);
