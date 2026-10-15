@@ -191,10 +191,7 @@ void main() {
     });
 
     test('an iterable with no failures collects to an empty list', () {
-      expect(
-        Result.collectFailures(const [Ok<int>(1), Ok<int>(2)]),
-        isEmpty,
-      );
+      expect(Result.collectFailures(const [Ok<int>(1), Ok<int>(2)]), isEmpty);
     });
   });
 
@@ -221,10 +218,10 @@ void main() {
 
   group('Result.zip', () {
     test('combines two Ok values into a record', () {
-      expect(Result.zip(const Ok<int>(1), const Ok<String>('a')), const Ok((
-        1,
-        'a',
-      )));
+      expect(
+        Result.zip(const Ok<int>(1), const Ok<String>('a')),
+        const Ok((1, 'a')),
+      );
     });
 
     test('fails with the first failure when both fail', () {
@@ -245,9 +242,11 @@ void main() {
   group('Result.zip3', () {
     test('combines three Ok values into a record', () {
       expect(
-        Result.zip3(const Ok<int>(1), const Ok<String>('a'), const Ok<bool>(
-          true,
-        )),
+        Result.zip3(
+          const Ok<int>(1),
+          const Ok<String>('a'),
+          const Ok<bool>(true),
+        ),
         const Ok((1, 'a', true)),
       );
     });

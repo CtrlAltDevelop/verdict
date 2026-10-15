@@ -85,14 +85,8 @@ sealed class Result<T> {
   /// ```dart
   /// Result.zip(getName(), getAge()); // Result<(String, int)>
   /// ```
-  static Result<(A, B)> zip<A, B>(Result<A> a, Result<B> b) => switch ((
-    a,
-    b,
-  )) {
-    (Ok(value: final valueA), Ok(value: final valueB)) => Ok((
-      valueA,
-      valueB,
-    )),
+  static Result<(A, B)> zip<A, B>(Result<A> a, Result<B> b) => switch ((a, b)) {
+    (Ok(value: final valueA), Ok(value: final valueB)) => Ok((valueA, valueB)),
     (Err(:final failure), _) => Err<(A, B)>(failure),
     (_, Err(:final failure)) => Err<(A, B)>(failure),
   };
