@@ -177,6 +177,27 @@ void main() {
     });
   });
 
+  group('Result.collectFailures', () {
+    test('gathers every failure, not just the first', () {
+      expect(
+        Result.collectFailures(const [
+          Ok<int>(1),
+          Err<int>(_failure),
+          Ok<int>(2),
+          Err<int>(_other),
+        ]),
+        [_failure, _other],
+      );
+    });
+
+    test('an iterable with no failures collects to an empty list', () {
+      expect(
+        Result.collectFailures(const [Ok<int>(1), Ok<int>(2)]),
+        isEmpty,
+      );
+    });
+  });
+
   group('flatten', () {
     test('collapses a nested Ok', () {
       expect(const Ok<Result<int>>(Ok<int>(1)).flatten(), const Ok<int>(1));

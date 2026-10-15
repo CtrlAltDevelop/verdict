@@ -1,3 +1,12 @@
+## 2.1.0
+
+- Added `Result.collectFailures`, the complement to `Result.collect`: gathers
+  every `Failure` in a list of results instead of stopping at the first one,
+  for validating a batch where every problem should be shown at once.
+- Added a `publish.yml` workflow: pushing a `vX.Y.Z` tag on `main` verifies
+  the tag matches `pubspec.yaml` and has a `CHANGELOG.md` entry, then
+  publishes to pub.dev via OIDC (no stored token).
+
 ## 2.0.0
 
 - No change to the published code. CI moved to the shared reusable workflow in

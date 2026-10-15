@@ -48,6 +48,21 @@ sealed class Result<T> {
     return Ok<List<T>>(values);
   }
 
+  /// Collects every [Failure] in [results], instead of stopping at the first
+  /// one like [collect] does.
+  ///
+  /// For validating a form or a batch where the caller wants to show every
+  /// problem at once rather than just the first:
+  ///
+  /// ```dart
+  /// Result.collectFailures([Ok(1), Err(a), Ok(2), Err(b)]); // [a, b]
+  /// Result.collectFailures([Ok(1), Ok(2)]);                 // []
+  /// ```
+  static List<Failure> collectFailures<T>(Iterable<Result<T>> results) => [
+    for (final result in results)
+      if (result case Err(:final failure)) failure,
+  ];
+
   /// Whether this is an [Ok].
   bool get isOk => this is Ok<T>;
 
