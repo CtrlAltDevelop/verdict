@@ -1,3 +1,9 @@
+## 2.2.1
+
+- No change to the public API. `lib/src/result.dart` and two test files
+  weren't `dart format`-clean, which cost pana its static-analysis points
+  on 2.2.0; this release is the formatted, full-score equivalent.
+
 ## 2.2.0
 
 - Added `Result.collectFailuresIndexed`, keying each failure by its position
