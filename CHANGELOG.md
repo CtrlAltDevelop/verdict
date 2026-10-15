@@ -1,3 +1,17 @@
+## 2.2.0
+
+- Added `Result.collectFailuresIndexed`, keying each failure by its position
+  in the batch — for reporting which field or row a failure belongs to.
+- Added `Result.zip` and `Result.zip3`, combining two or three independent
+  results into a record, both/all evaluated regardless of order.
+- Added `Result.tap`, running a side effect on either branch without writing
+  it twice via `onOk` and `onErr`.
+- Added `Failure.toMap()` / `Failure.toJson()`, a JSON-safe map of a
+  failure's displayable fields for logging or an error response —
+  deliberately excluding `cause` and `stackTrace`.
+- Added `guardWithRetry`, the retrying counterpart to `guard`, for a flaky
+  call worth a second try before mapping the last error.
+
 ## 2.1.0
 
 - Added `Result.collectFailures`, the complement to `Result.collect`: gathers

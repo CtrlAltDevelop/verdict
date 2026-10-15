@@ -100,6 +100,39 @@ Future<Result<T>> guard<T>(
   }
 }
 
+/// Like [guard], but retries [body] up to [maxAttempts] times before mapping
+/// the last error.
+///
+/// For a flaky call worth a second try — a network request, a lock
+/// contended by another process — rather than failing on the first blip:
+///
+/// ```dart
+/// Future<Result<User>> getUser() =>
+///     guardWithRetry(() async => _api.fetchUser(), mapper, maxAttempts: 3);
+/// ```
+///
+/// [delayBetweenAttempts] runs between attempts, not before the first one or
+/// after the last. [maxAttempts] must be at least 1, in which case this
+/// behaves exactly like [guard].
+Future<Result<T>> guardWithRetry<T>(
+  Future<T> Function() body, [
+  FailureMapper mapper = const DefaultFailureMapper(),
+  int maxAttempts = 3,
+  Duration Function(int attempt)? delayBetweenAttempts,
+]) async {
+  assert(maxAttempts >= 1, 'maxAttempts must be at least 1');
+  for (var attempt = 1; ; attempt++) {
+    try {
+      return Ok<T>(await body());
+    } catch (error, stackTrace) {
+      if (attempt >= maxAttempts) return Err<T>(mapper.map(error, stackTrace));
+      if (delayBetweenAttempts != null) {
+        await Future<void>.delayed(delayBetweenAttempts(attempt));
+      }
+    }
+  }
+}
+
 /// The synchronous counterpart to [guard].
 Result<T> guardSync<T>(
   T Function() body, [

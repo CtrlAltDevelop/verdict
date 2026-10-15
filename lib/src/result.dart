@@ -63,6 +63,47 @@ sealed class Result<T> {
       if (result case Err(:final failure)) failure,
   ];
 
+  /// Like [collectFailures], but keyed by each failing result's position in
+  /// [results] — for reporting which field or row a failure belongs to:
+  ///
+  /// ```dart
+  /// Result.collectFailuresIndexed([Ok(1), Err(a), Ok(2), Err(b)]);
+  /// // {1: a, 3: b}
+  /// ```
+  static Map<int, Failure> collectFailuresIndexed<T>(
+    Iterable<Result<T>> results,
+  ) => {
+    for (final (index, result) in results.indexed)
+      if (result case Err(:final failure)) index: failure,
+  };
+
+  /// Combines two independent results into a record of both values.
+  ///
+  /// Unlike [flatMap], neither result depends on the other, so both are
+  /// always evaluated; on failure, [a]'s failure wins:
+  ///
+  /// ```dart
+  /// Result.zip(getName(), getAge()); // Result<(String, int)>
+  /// ```
+  static Result<(A, B)> zip<A, B>(Result<A> a, Result<B> b) => switch ((
+    a,
+    b,
+  )) {
+    (Ok(value: final valueA), Ok(value: final valueB)) => Ok((
+      valueA,
+      valueB,
+    )),
+    (Err(:final failure), _) => Err<(A, B)>(failure),
+    (_, Err(:final failure)) => Err<(A, B)>(failure),
+  };
+
+  /// The three-result counterpart to [zip].
+  static Result<(A, B, C)> zip3<A, B, C>(
+    Result<A> a,
+    Result<B> b,
+    Result<C> c,
+  ) => zip(zip(a, b), c).map((pair) => (pair.$1.$1, pair.$1.$2, pair.$2));
+
   /// Whether this is an [Ok].
   bool get isOk => this is Ok<T>;
 
@@ -203,6 +244,17 @@ sealed class Result<T> {
   /// Runs [action] when this is an [Err] and returns this result unchanged.
   Result<T> onErr(void Function(Failure failure) action) {
     if (this case Err(:final failure)) action(failure);
+    return this;
+  }
+
+  /// Runs [action] regardless of whether this is an [Ok] or an [Err], and
+  /// returns this result unchanged.
+  ///
+  /// For a side effect that does not care which branch it was — logging that
+  /// an operation finished, stopping a spinner — without writing it twice via
+  /// [onOk] and [onErr].
+  Result<T> tap(void Function(Result<T> result) action) {
+    action(this);
     return this;
   }
 }

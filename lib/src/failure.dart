@@ -70,6 +70,23 @@ sealed class Failure extends Equatable {
   String toString() =>
       '$runtimeType(title: $title, message: $message, '
       'code: $code, referenceId: $referenceId)';
+
+  /// A JSON-safe map of this failure's displayable fields, for logging or an
+  /// error response.
+  ///
+  /// Deliberately excludes [cause] and [stackTrace] — they are diagnostics
+  /// meant for a debugger or a crash reporter's own structured fields, not
+  /// for JSON that might be rendered or stored.
+  Map<String, Object?> toMap() => {
+    'type': runtimeType.toString(),
+    'title': title,
+    'message': message,
+    if (referenceId != null) 'referenceId': referenceId,
+    if (code != null) 'code': code,
+  };
+
+  /// Alias for [toMap], for callers that pass this straight to `jsonEncode`.
+  Map<String, Object?> toJson() => toMap();
 }
 
 /// The server was reached and answered, but reported the operation failed.

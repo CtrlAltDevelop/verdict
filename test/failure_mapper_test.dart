@@ -116,6 +116,60 @@ void main() {
     });
   });
 
+  group('guardWithRetry', () {
+    const mapper = _FixedMapper(ApiFailure(title: 't', message: 'mapped'));
+
+    test('wraps a returned value in Ok without retrying', () async {
+      var calls = 0;
+      final result = await guardWithRetry(() async {
+        calls++;
+        return 42;
+      }, mapper);
+
+      expect(result, const Ok<int>(42));
+      expect(calls, 1);
+    });
+
+    test('retries after a failure and succeeds within maxAttempts', () async {
+      var calls = 0;
+      final result = await guardWithRetry(() async {
+        calls++;
+        if (calls < 2) throw Exception('boom');
+        return 42;
+      }, mapper, 3);
+
+      expect(result, const Ok<int>(42));
+      expect(calls, 2);
+    });
+
+    test('maps the last error once maxAttempts is exhausted', () async {
+      var calls = 0;
+      final result = await guardWithRetry<int>(() async {
+        calls++;
+        throw Exception('boom');
+      }, mapper, 2);
+
+      expect(result.isErr, isTrue);
+      expect(result.failureOrNull?.message, 'mapped');
+      expect(calls, 2);
+    });
+
+    test('runs the delay between attempts, not before or after', () async {
+      final delays = <int>[];
+      var calls = 0;
+      await guardWithRetry<int>(() async {
+        calls++;
+        throw Exception('boom');
+      }, mapper, 3, (attempt) {
+        delays.add(attempt);
+        return Duration.zero;
+      });
+
+      expect(delays, [1, 2]);
+      expect(calls, 3);
+    });
+  });
+
   group('failureOrigin', () {
     test('names the calling function', () {
       expect(namedCaller(), contains('namedCaller'));

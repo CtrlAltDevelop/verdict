@@ -135,4 +135,46 @@ void main() {
       );
     });
   });
+
+  group('toMap / toJson', () {
+    test('includes the type and only the displayable fields present', () {
+      const failure = ApiFailure(
+        title: 't',
+        message: 'm',
+        code: 404,
+        referenceId: 'r-1',
+      );
+
+      expect(failure.toMap(), {
+        'type': 'ApiFailure',
+        'title': 't',
+        'message': 'm',
+        'referenceId': 'r-1',
+        'code': 404,
+      });
+      expect(failure.toJson(), failure.toMap());
+    });
+
+    test('omits referenceId and code when absent', () {
+      const failure = UnknownFailure(title: 't', message: 'm');
+
+      expect(failure.toMap(), {
+        'type': 'UnknownFailure',
+        'title': 't',
+        'message': 'm',
+      });
+    });
+
+    test('excludes cause and stackTrace', () {
+      final failure = UnknownFailure(
+        title: 't',
+        message: 'm',
+        cause: Exception('boom'),
+        stackTrace: StackTrace.current,
+      );
+
+      expect(failure.toMap().keys, isNot(contains('cause')));
+      expect(failure.toMap().keys, isNot(contains('stackTrace')));
+    });
+  });
 }

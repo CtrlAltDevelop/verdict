@@ -198,6 +198,90 @@ void main() {
     });
   });
 
+  group('Result.collectFailuresIndexed', () {
+    test('keys each failure by its position', () {
+      expect(
+        Result.collectFailuresIndexed(const [
+          Ok<int>(1),
+          Err<int>(_failure),
+          Ok<int>(2),
+          Err<int>(_other),
+        ]),
+        {1: _failure, 3: _other},
+      );
+    });
+
+    test('an iterable with no failures collects to an empty map', () {
+      expect(
+        Result.collectFailuresIndexed(const [Ok<int>(1), Ok<int>(2)]),
+        isEmpty,
+      );
+    });
+  });
+
+  group('Result.zip', () {
+    test('combines two Ok values into a record', () {
+      expect(Result.zip(const Ok<int>(1), const Ok<String>('a')), const Ok((
+        1,
+        'a',
+      )));
+    });
+
+    test('fails with the first failure when both fail', () {
+      expect(
+        Result.zip(const Err<int>(_failure), const Err<String>(_other)),
+        const Err<(int, String)>(_failure),
+      );
+    });
+
+    test('fails with the second failure when only it fails', () {
+      expect(
+        Result.zip(const Ok<int>(1), const Err<String>(_other)),
+        const Err<(int, String)>(_other),
+      );
+    });
+  });
+
+  group('Result.zip3', () {
+    test('combines three Ok values into a record', () {
+      expect(
+        Result.zip3(const Ok<int>(1), const Ok<String>('a'), const Ok<bool>(
+          true,
+        )),
+        const Ok((1, 'a', true)),
+      );
+    });
+
+    test('fails with the first failure encountered', () {
+      expect(
+        Result.zip3(
+          const Ok<int>(1),
+          const Err<String>(_failure),
+          const Err<bool>(_other),
+        ),
+        const Err<(int, String, bool)>(_failure),
+      );
+    });
+  });
+
+  group('tap', () {
+    test('runs the action for an Ok and returns the result unchanged', () {
+      Result<int>? seen;
+      final result = const Ok<int>(1).tap((r) => seen = r);
+
+      expect(result, const Ok<int>(1));
+      expect(seen, const Ok<int>(1));
+    });
+
+    test('runs the action for an Err and returns the result unchanged', () {
+      Result<int>? seen;
+      final result = const Err<int>(_failure).tap((r) => seen = r);
+
+      expect(result, const Err<int>(_failure));
+      expect(seen, const Err<int>(_failure));
+    });
+  });
+
   group('flatten', () {
     test('collapses a nested Ok', () {
       expect(const Ok<Result<int>>(Ok<int>(1)).flatten(), const Ok<int>(1));
